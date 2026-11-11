@@ -1,0 +1,7 @@
+[
+  {"customer_id": 1, "name": "Asha", "email": "asha@example.com", "address": {"city": "Pune"}},
+  {"customer_id": 2, "name": "Ravi", "email": "ravi@example.com", "address": {"city": "Kolhapur"}},
+  {"customer_id": 3, "name": "Neha", "email": null, "address": {"city": "Mumbai"}},
+  {"customer_id": 4, "name": "Omkar", "email": "omkar@example.com", "address": {"city": "Nagpur"}},
+  {"customer_id": 4, "name": "Omkar", "email": "omkar@example.com", "address": {"city": "Nagpur"}}
+]
