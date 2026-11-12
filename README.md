@@ -1,6 +1,6 @@
 # Multi-Source Data Connector
 
-A beginner data engineering project I built in Python. It reads data from three sources (a CSV file, a JSON file and a REST API), cleans it, checks it, and loads it into a PostgreSQL database.
+This is a data engineering project I built in Python. It reads data from three sources (a CSV file, a JSON file and a REST API), cleans it, checks it, and loads it into a PostgreSQL database.
 
 ## Data Sources
 
@@ -81,8 +81,3 @@ Each source follows the same three steps: extract, transform, load.
 - Writing unit tests for data cleaning code
 - Using Git and GitHub
 
-## Future Improvements
-
-- Load only new records instead of replacing the whole table
-- Schedule the pipeline with Airflow
-- Add Docker and automatic tests with GitHub Actions
