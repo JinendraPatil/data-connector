@@ -1,56 +1,88 @@
 # Multi-Source Data Connector
 
-A Python ETL pipeline that ingests data from a CSV file, a JSON file, and a
-REST API, cleans and validates it, and loads it into PostgreSQL.
+A beginner data engineering project I built in Python. It reads data from three sources (a CSV file, a JSON file and a REST API), cleans it, checks it, and loads it into a PostgreSQL database.
 
-## Architecture
+## Data Sources
 
-CSV (Superstore, ~10K rows) ─┐
-JSON (customers)             ├─> Connectors (extract -> clean -> validate) ─> PostgreSQL
-REST API (CoinGecko)         ─┘
+- **Superstore sales (CSV):** about 10,000 rows of retail sales data
+- **Customers (JSON):** a small file with nested address data
+- **Crypto prices (REST API):** live market data from the CoinGecko API
 
-[Add a diagram image here, drawn at excalidraw.com]
+## Tech Used
 
-## Tech Stack
+Python, pandas, SQLAlchemy, PostgreSQL, requests, pytest, Git
 
-Python, pandas, SQLAlchemy, PostgreSQL, requests, pytest
+## Project Structure
+
+```
+data-connector/
+├── data/              # superstore.csv and customers.json
+├── tests/             # pytest tests
+├── connectors.py      # one class for each source
+├── cleaning.py        # cleaning and validation functions
+├── db.py              # database connection
+├── main.py            # runs the whole pipeline
+└── requirements.txt
+```
+
+## How It Works
+
+Each source follows the same three steps: extract, transform, load.
+
+- **Superstore CSV:** renames columns, removes extra spaces, keeps postal codes as text so leading zeros are not lost, removes duplicate rows, and checks that sales, quantity and discount values are valid
+- **Customers JSON:** flattens the nested address, fills missing emails with "unknown", and removes duplicates
+- **Crypto API:** fetches the data, retries up to 3 times if the request fails, and drops rows with no price
 
 ## How to Run
 
-1. Create a virtual environment: `python -m venv venv` and activate it
-2. Install libraries: `pip install -r requirements.txt`
-3. Create a PostgreSQL database named `connector_db`
-4. Create a `.env` file with:
-   `DB_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/connector_db`
-5. Run the pipeline: `python main.py`
-6. Run the tests: `python -m pytest`
+1. Create and activate a virtual environment
+   ```
+   python -m venv venv
+   venv\Scripts\activate
+   ```
+2. Install the libraries
+   ```
+   pip install -r requirements.txt
+   ```
+3. Create a PostgreSQL database called `connector_db`
+4. Create a `.env` file in the main folder with your database details
+   ```
+   DB_URL=postgresql+psycopg2://postgres:YOUR_PASSWORD@localhost:5432/connector_db
+   ```
+5. Run the pipeline
+   ```
+   python main.py
+   ```
+6. Run the tests
+   ```
+   python -m pytest
+   ```
 
-## What the Pipeline Does
+## Design Choices
 
-- **Superstore CSV:** renames columns, trims spaces, keeps postal codes as text,
-  removes duplicate rows, validates sales, quantity and discount
-- **Customers JSON:** flattens nested address, fills missing emails, removes duplicates
-- **Crypto API:** fetches market data with retry and backoff, drops rows with no price
+- Each source has its own class, so a new source can be added without changing the others
+- Every load replaces the table, so running the pipeline twice does not create duplicate rows
+- If one source fails, the others still run
+- All runs are written to a log file, `pipeline.log`
+- The database password is kept in `.env`, which is not uploaded to GitHub
 
-## Design Decisions
+## What Happens When Something Fails
 
-- One class per source, sharing a `BaseConnector` with extract, transform, load
-- Loads use `replace`, so running the pipeline twice gives the same result (idempotent)
-- One failing source does not stop the others
-- All runs are logged to `pipeline.log`
-- Credentials are stored in `.env` and never committed
+- **No internet:** the API connector retries 3 times and then fails, while the CSV and JSON loads still finish
+- **Missing file:** only that source fails, and the error is logged
+- **Wrong database password:** the load fails and the error is written to `pipeline.log`
+- **Invalid data (for example, negative sales):** the quality check stops the load
 
-## Failure Scenarios Tested
+## What I Learned
 
-| Scenario | Behaviour |
-|---|---|
-| No internet | [write what you saw] |
-| Missing JSON file | [write what you saw] |
-| Wrong database password | [write what you saw] |
-| Invalid sales value | [write what you saw] |
+- How to build a simple ETL pipeline from scratch
+- Cleaning data with pandas and loading it into PostgreSQL
+- Handling API failures with retries and logging
+- Writing unit tests for data cleaning code
+- Using Git and GitHub
 
 ## Future Improvements
 
-- Incremental loads instead of full replace
-- Orchestration with Airflow
-- Docker and CI with GitHub Actions
+- Load only new records instead of replacing the whole table
+- Schedule the pipeline with Airflow
+- Add Docker and automatic tests with GitHub Actions
