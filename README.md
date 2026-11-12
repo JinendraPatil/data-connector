@@ -63,14 +63,14 @@ Each source follows the same three steps: extract, transform, load.
 - Each source has its own class, so a new source can be added without changing the others
 - Every load replaces the table, so running the pipeline twice does not create duplicate rows
 - If one source fails, the others still run
-- All runs are written to a log file, `pipeline.log`
-- The database password is kept in `.env`, which is not uploaded to GitHub
+- All runs are written to a log file, pipeline.log
+- The database password is kept in .env, which is not uploaded to GitHub
 
 ## What Happens When Something Fails
 
 - **No internet:** the API connector retries 3 times and then fails, while the CSV and JSON loads still finish
 - **Missing file:** only that source fails, and the error is logged
-- **Wrong database password:** the load fails and the error is written to `pipeline.log`
+- **Wrong database password:** the load fails and the error is written to pipeline.log
 - **Invalid data (for example, negative sales):** the quality check stops the load
 
 ## What I Learned
